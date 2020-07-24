@@ -1,16 +1,19 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, Observer, BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, shareReplay } from 'rxjs/operators';
 import { FirebaseService } from './firebase';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  constructor(private firebase: FirebaseService, private router: Router) {}
+  user$: Observable<any>;
+  constructor(private firebase: FirebaseService, private router: Router) {
+    this.user$ = this.auth$.pipe(shareReplay(1));
+  }
 
-  get user$(): Observable<any> {
+  private get auth$(): Observable<any> {
     return this.firebase.init$.pipe(
       switchMap(({ firebase, app }) => {
         return Observable.create((obs: Observer<any>) => {

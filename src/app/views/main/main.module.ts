@@ -14,6 +14,10 @@ const routes: Routes = [
         loadChildren: () => import('./eye/eye.module').then((m) => m.EyeModule),
       },
       {
+        path: 'chat',
+        loadChildren: () => import('./chat/chat.module').then((m) => m.ChatModule),
+      },
+      {
         path: 'settings',
         loadChildren: () =>
           import('./settings/settings.module').then((m) => m.SettingsModule),

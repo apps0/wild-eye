@@ -1,21 +1,34 @@
-<ion-header>
-  <ion-toolbar color="secondary">
-    <ion-buttons slot="start">
-      <ion-back-button></ion-back-button>
-    </ion-buttons>
-    <ion-title>WILD EYE</ion-title>
-  </ion-toolbar>
-</ion-header>
 <ion-content>
-  <div class="centerContainer">
-    <ion-card class="videoCard">
-      <video
-        autoplay="true"
-        id="myVideo"
-        muted
-        poster="https://mdbootstrap.com/img/Photos/Others/placeholder-avatar.jpg"
-      ></video>
-      <canvas id="myCanvas" class="capture"></canvas>
-    </ion-card>
-  </div>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Create Alert</ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-item>
+        <ion-label position="floating">Object tag</ion-label>
+        <ion-input placeholder="person" #tag value="person"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label>Sound</ion-label>
+        <ion-checkbox checked="true" #sound></ion-checkbox>
+      </ion-item>
+      <ion-item>
+        <ion-button>
+          Submit
+        </ion-button>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
 </ion-content>
+<app-drawer [options]="drawerOptions" #drawer>
+  <ion-grid class="ion-no-padding">
+    <ion-row
+      class="ion-no-padding ion-align-items-center ion-justify-content-center"
+    >
+      <ion-col class="ion-no-padding" size-lg="4" size-md="6" size-sm="12">
+        <app-camera [drawer]="drawer"></app-camera>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</app-drawer>

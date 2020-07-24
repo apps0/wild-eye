@@ -1,0 +1,29 @@
+<ion-content padding>
+  <div class="container">
+    <div *ngFor="let msg of messageList" class="message left">
+      <img class="user-img" [src]="msg.photoURL" alt="" src="" />
+      <div class="msg-detail">
+        <div class="msg-info">
+          <p>{{ msg.displayName }}</p>
+        </div>
+        <div class="msg-content">
+          <span class="triangle"></span>
+          <p class="line-breaker">{{ msg.text }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>
+<ion-footer no-border>
+  <div class="input-wrap">
+    <textarea
+      placeholder="Enter your message!"
+      [formControl]="chatInput"
+      (keyup.enter)="sendMessage()"
+    >
+    </textarea>
+    <ion-button shape="round" (click)="sendMessage()">
+      <ion-icon slot="icon-only" name="send-outline"></ion-icon>
+    </ion-button>
+  </div>
+</ion-footer>
