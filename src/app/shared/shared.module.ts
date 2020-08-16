@@ -2,11 +2,13 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 
-import { DrawerComponent } from './components/drawer/drawer.component';
 import { CameraComponent } from './components/camera/camera.component';
+import { AlertComponent } from './components/alert/alert.component';
+import { ReactiveFormsModule } from '@angular/forms';
+
 @NgModule({
-  declarations: [DrawerComponent, CameraComponent],
-  imports: [CommonModule, IonicModule],
-  exports: [CommonModule, IonicModule, DrawerComponent, CameraComponent],
+  declarations: [CameraComponent, AlertComponent],
+  imports: [CommonModule, IonicModule, ReactiveFormsModule],
+  exports: [CommonModule, IonicModule, CameraComponent, AlertComponent],
 })
 export class SharedModule {}

@@ -39,7 +39,7 @@ export class AuthGuard implements CanActivate, CanLoad {
   }
 
   validation(path: string) {
-    return this.auth.user$.pipe(
+    return this.auth.auth$.pipe(
       take(1),
       map((x) => {
         console.log('user', x);

@@ -28,7 +28,7 @@ export class LoginComponent implements OnInit {
       let uid = credential.user.uid;
 
       if (uid) {
-        this.router.navigate([`main`]);
+        this.router.navigateByUrl('main');
       }
     } catch (err) {
       this.theme.toast(

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { ChatService } from 'src/app/shared';
+import { ChatService, AuthService } from 'src/app/shared';
 import { FormControl, Validators } from '@angular/forms';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-chat',
@@ -8,35 +9,24 @@ import { FormControl, Validators } from '@angular/forms';
   styleUrls: ['./chat.component.scss'],
 })
 export class ChatComponent implements OnInit {
-  messageList: any[] = [
-    {
-      displayName: 'Sachin',
-      photoURL:
-        'https://lh3.googleusercontent.com/a-/AOh14GgGSkGSLOuaXDAQZQ6ocQqPwSHlao6A2i27Zr2i',
-      text: 'Hii',
-      uid: 'FnqgoczVPiayCq2xul5XFsHJ3f72',
-      time: new Date(),
-    },
-  ];
+  messages$;
   chatInput: FormControl = new FormControl('', Validators.required);
-  constructor(private chatService: ChatService) {}
+  constructor(private chatService: ChatService, private auth: AuthService) {}
 
   ngOnInit() {
-    // this.chatService.getMessages().subscribe(messages => {
-    //   this.messageList = messages;
-    // });
+    this.messages$ = this.chatService.get();
   }
   sendMessage() {
     if (this.chatInput.valid) {
-      this.messageList.push({
-        displayName: 'Sachin',
-        photoURL:
-          'https://lh3.googleusercontent.com/a-/AOh14GgGSkGSLOuaXDAQZQ6ocQqPwSHlao6A2i27Zr2i',
-        text: this.chatInput.value,
-        uid: 'FnqgoczVPiayCq2xul5XFsHJ3f72',
-        time: new Date(),
-      });
+      this.chatService.send(this.chatInput.value);
       this.chatInput.reset();
     }
+  }
+  isMyMessage$(msg) {
+    return this.auth.user$.pipe(
+      map((x) => {
+        return x && x.uid == msg.uid;
+      })
+    );
   }
 }

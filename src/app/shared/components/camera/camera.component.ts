@@ -1,5 +1,15 @@
-import { Component, OnInit, ElementRef, Input } from '@angular/core';
-import { DrawerComponent } from '../drawer/drawer.component';
+import {
+  Component,
+  OnInit,
+  ElementRef,
+  Input,
+  ViewChild,
+  Output,
+  EventEmitter,
+} from '@angular/core';
+import { Subject } from 'rxjs';
+import { debounceTime, throttleTime } from 'rxjs/operators';
+
 declare var cocoSsd;
 @Component({
   selector: 'app-camera',
@@ -7,87 +17,108 @@ declare var cocoSsd;
   styleUrls: ['./camera.component.scss'],
 })
 export class CameraComponent implements OnInit {
-  video: HTMLVideoElement;
+  @ViewChild('video') video: ElementRef;
+  @ViewChild('canvas') canvas: ElementRef;
+  @Output('prediction') onPrediction: EventEmitter<string> = new EventEmitter();
 
-  @Input('drawer')
-  drawer: DrawerComponent;
+  predictionCtrl$: Subject<any> = new Subject();
 
-  constructor(private elem: ElementRef) {}
+  constructor() {
+    this.predictionCtrl$
+      .pipe(throttleTime(400))
+      .subscribe((x) => this.onPrediction.emit(x));
+  }
 
   async ngOnInit() {
-    await this.webcamInit();
-    this.predictWithCocoModel();
+    if (
+      navigator.mediaDevices.getUserMedia ||
+      (navigator.mediaDevices as any).webkitGetUserMedia
+    ) {
+      // define a Promise that'll be used to load the webcam and read its frames
+      const webcamPromise = navigator.mediaDevices
+        .getUserMedia({
+          video: true,
+          audio: false,
+        })
+        .then(
+          (stream) => {
+            // pass the current frame to the window.stream
+            (window as any).stream = stream;
+            // pass the stream to the videoRef
+            this.video.nativeElement.srcObject = stream;
+
+            return new Promise((resolve) => {
+              this.video.nativeElement.onloadedmetadata = () => {
+                resolve();
+              };
+            });
+          },
+          (error) => {
+            console.log("Couldn't start the webcam");
+            console.error(error);
+          }
+        );
+
+      // define a Promise that'll be used to load the model
+      const loadlModelPromise = cocoSsd.load();
+
+      // resolve all the Promises
+      Promise.all([loadlModelPromise, webcamPromise])
+        .then((values) => {
+          this.detectFromVideoFrame(values[0], this.video.nativeElement);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
   }
+  detectFromVideoFrame = (model, video) => {
+    model.detect(video).then(
+      (predictions) => {
+        this.predictionCtrl$.next(predictions);
 
-  async webcamInit() {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: false,
-      video: { facingMode: 'user' },
-    });
+        this.showDetections(predictions);
 
-    this.video = this.video = <HTMLVideoElement>(
-      this.elem.nativeElement.querySelector('#myVideo')
+        requestAnimationFrame(() => {
+          this.detectFromVideoFrame(model, video);
+        });
+      },
+      (error) => {
+        console.log("Couldn't start the webcam");
+        console.error(error);
+      }
     );
-    this.video.srcObject = stream;
-    this.video.onloadedmetadata = () => {
-      this.video.play();
-    };
-  }
-
-  public async predictWithCocoModel() {
-    const model = await cocoSsd.load('lite_mobilenet_v2');
-    this.detectFrame(this.video, model);
-  }
-
-  detectFrame = (video, model) => {
-    model.detect(video).then((predictions) => {
-      this.renderPredictions(predictions);
-      requestAnimationFrame(() => {
-        this.detectFrame(video, model);
-      });
-    });
   };
 
-  renderPredictions = (predictions) => {
-    // console.log(predictions);
-    const canvas = <HTMLCanvasElement>document.getElementById('myCanvas');
-
-    const ctx = canvas.getContext('2d');
-    canvas.width = 600;
-    canvas.height = 480;
+  showDetections = (predictions) => {
+    const ctx = this.canvas.nativeElement.getContext('2d');
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-    // Fonts
-    const font = '16px sans-serif';
+    const font = '24px helvetica';
     ctx.font = font;
     ctx.textBaseline = 'top';
-    ctx.drawImage(this.video, 0, 0, 600, 480);
 
     predictions.forEach((prediction) => {
-      // Bounding boxes's coordinates and sizes
       const x = prediction.bbox[0];
       const y = prediction.bbox[1];
       const width = prediction.bbox[2];
       const height = prediction.bbox[3];
-      // Bounding box style
-      ctx.strokeStyle = '#00FFFF';
-      ctx.lineWidth = 2;
-      // Draw the bounding
+      // Draw the bounding box.
+      ctx.strokeStyle = '#2fff00';
+      ctx.lineWidth = 1;
       ctx.strokeRect(x, y, width, height);
-
-      // Label background
-      ctx.fillStyle = '#00FFFF';
+      // Draw the label background.
+      ctx.fillStyle = '#2fff00';
       const textWidth = ctx.measureText(prediction.class).width;
-      const textHeight = parseInt(font, 10); // base 10
-      ctx.fillRect(x, y, textWidth + 4, textHeight + 4);
-    });
+      const textHeight = parseInt(font, 10);
+      // draw top left rectangle
+      ctx.fillRect(x, y, textWidth + 10, textHeight + 10);
+      // draw bottom left rectangle
+      ctx.fillRect(x, y + height - textHeight, textWidth + 15, textHeight + 10);
 
-    predictions.forEach((prediction) => {
-      // Write prediction class names
-      const x = prediction.bbox[0];
-      const y = prediction.bbox[1];
+      // Draw the text last to ensure it's on top.
       ctx.fillStyle = '#000000';
       ctx.fillText(prediction.class, x, y);
+      ctx.fillText(prediction.score.toFixed(2), x, y + height - textHeight);
     });
   };
 }

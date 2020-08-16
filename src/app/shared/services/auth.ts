@@ -8,18 +8,22 @@ import { FirebaseService } from './firebase';
   providedIn: 'root',
 })
 export class AuthService {
-  user$: Observable<any>;
+  user$: BehaviorSubject<any> = new BehaviorSubject(null);
   constructor(private firebase: FirebaseService, private router: Router) {
-    this.user$ = this.auth$.pipe(shareReplay(1));
+    this.auth$.subscribe((u) => {
+      console.log('this.auth$.subscribe', u);
+      this.user$.next(u);
+    });
   }
 
-  private get auth$(): Observable<any> {
+  get auth$(): Observable<any> {
     return this.firebase.init$.pipe(
       switchMap(({ firebase, app }) => {
         return Observable.create((obs: Observer<any>) => {
           app.auth().onAuthStateChanged(
             (u) => {
               console.count('onAuthStateChanged');
+              console.log(u);
               if (u) {
                 obs.next(u);
               } else {

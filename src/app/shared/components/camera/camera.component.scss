@@ -1,31 +1,11 @@
-ion-content {
-  height: 80vh;
-}
-.centerContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  width: 100%;
-  img {
+:host {
+  video
+  {
+    position: fixed;
+    width: 100%;
     height: 100%;
   }
-  video {
-    height: 100%;
-    display: none;
-  }
-  .capture {
-    max-width: 100%;
-    max-height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    canvas {
-      position: absolute;
-    }
-    img {
-      max-width: unset !important;
-    }
+  canvas {
+    position: fixed;
   }
 }

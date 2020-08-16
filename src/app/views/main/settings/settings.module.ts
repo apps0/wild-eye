@@ -3,6 +3,7 @@ import { SettingsComponent } from "./settings.component";
 import { Routes, RouterModule } from "@angular/router";
 import { IonicModule } from "@ionic/angular";
 import { SharedModule } from "src/app/shared";
+import { ReactiveFormsModule } from '@angular/forms';
 
 const routes: Routes = [
   {
@@ -13,6 +14,6 @@ const routes: Routes = [
 
 @NgModule({
   declarations: [SettingsComponent],
-  imports: [IonicModule, RouterModule.forChild(routes), SharedModule],
+  imports: [IonicModule, RouterModule.forChild(routes), SharedModule,ReactiveFormsModule],
 })
 export class SettingsModule {}
