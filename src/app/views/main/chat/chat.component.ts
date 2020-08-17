@@ -14,7 +14,14 @@ export class ChatComponent implements OnInit {
   constructor(private chatService: ChatService, private auth: AuthService) {}
 
   ngOnInit() {
-    this.messages$ = this.chatService.get();
+    this.messages$ = this.chatService.get().pipe(
+      map((x) => {
+        return x.sort(
+          (a: any, b: any) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+      })
+    );
   }
   sendMessage() {
     if (this.chatInput.valid) {

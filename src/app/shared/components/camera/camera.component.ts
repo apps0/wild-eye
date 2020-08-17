@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { Subject } from 'rxjs';
 import { debounceTime, throttleTime } from 'rxjs/operators';
+import { AuthService } from '../../services/auth';
 
 declare var cocoSsd;
 @Component({
@@ -23,7 +24,7 @@ export class CameraComponent implements OnInit {
 
   predictionCtrl$: Subject<any> = new Subject();
 
-  constructor() {
+  constructor(private auth:AuthService) {
     this.predictionCtrl$
       .pipe(throttleTime(400))
       .subscribe((x) => this.onPrediction.emit(x));
